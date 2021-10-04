@@ -12,3 +12,5 @@ mean_random_var = mean(exponential_random_var_list)
 variance_random_var = variance(exponential_random_var_list)
 print(f'Mean: {mean_random_var}')
 print(f'Variance: {variance_random_var}')
+
+print('hi')
