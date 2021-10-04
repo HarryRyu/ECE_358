@@ -85,8 +85,10 @@ def startSimulation(simulation_duration, packet_rate_lambd, size_lambd, transmis
     output_list = []
 
     packets_in_buffer = 0
+    i = 0
 
     while (queue.size() != 0):
+        print(i)
         event = queue.output_queue()
 
         if (event.get_event_type() == "Arrival"):
@@ -95,9 +97,10 @@ def startSimulation(simulation_duration, packet_rate_lambd, size_lambd, transmis
             packets_in_buffer -= 1
         elif (event.get_event_type() == "Observer"):
             output_list.append({'time': event.get_occurrence_time(), 'packets': packets_in_buffer})
+        i += 1
 
     print(output_list)
 
-startSimulation(10, 50, 1/2000, 1000000)
+startSimulation(1000, 100, 1/2000, 1000000)
 
 
