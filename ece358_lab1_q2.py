@@ -1,5 +1,6 @@
 import math
 import random
+import matplotlib.pyplot as plt
 
 
 def exponential_random_var(lambd):
@@ -101,7 +102,46 @@ def startSimulation(simulation_duration, packet_rate_lambd, size_lambd, transmis
             output_list.append({'time': event.get_occurrence_time(), 'packets': packets_in_buffer})
         i += 1
 
-    print(output_list)
+    packets_average = 0
+    packets_idle = 0
+    for i in output_list:
+        packets_average += i["packets"]
+        if (i["packets"] == 0): 
+            packets_idle += 1
 
 
-startSimulation(1000, 100, 1 / 2000, 1000000)
+    packets_average = packets_average / len(output_list)
+    packets_idle = packets_idle / len(output_list)
+
+    
+    return {"packets_average": packets_average, "packets_idle" : packets_idle}
+
+
+TRANSMISSION_TIME = 1000000
+PACKET_SIZE = 2000
+SIMULATION_TIME = 100
+
+average_list_y = []
+idle_list_y = []
+list_x = []
+
+for i in range(25, 95, 10):
+    p = i * TRANSMISSION_TIME / 2000 / 100
+    simulation_result = startSimulation(SIMULATION_TIME, p , 1 / PACKET_SIZE, TRANSMISSION_TIME)
+    average_list_y.append(simulation_result["packets_average"])
+    idle_list_y.append(simulation_result["packets_idle"])
+    list_x.append(i / 100)
+
+plt.plot(list_x, average_list_y)
+plt.xlabel("p")
+plt.ylabel("E[N]")
+plt.title("Average # of Packets vs Utilization of Queue")
+plt.show()
+
+plt.plot(list_x, idle_list_y)
+plt.xlabel("p")
+plt.ylabel("P_idle")
+plt.title("P_idle vs Utilization of Queue")
+plt.show()
+
+
