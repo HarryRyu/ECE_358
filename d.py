@@ -1,0 +1,3 @@
+from ece358_lab1_q2 import simulate_question_6
+
+simulate_question_6()
