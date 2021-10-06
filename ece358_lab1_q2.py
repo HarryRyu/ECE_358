@@ -22,37 +22,42 @@ class Queue:
         queue = []
 
         # Generate arrival and departure events.
-        while (1):
-            time = exponential_random_var(packet_rate_lambd)
+        while simulation_duration < simulation_time:
+            # Generate random variables of inter-arrival times and sizes of packets.
+            event_time = exponential_random_var(packet_rate_lambd)
             packet_size = exponential_random_var(size_lambd)
 
-            simulation_duration += time
-            queue.append(Event("Arrival", simulation_duration, link_number))
+            # Sum the total arrival time so it halts once it is equal to or greater
+            # than the provided simulation time.
+            simulation_duration += event_time
 
+            # Calculate the service time.
             service_time = packet_size / transmission_rate
 
+            # If statements to check if there is anything being serviced right now.
+            # If there is, the departure time is the departure time of the previous
+            # packet, plus the service time of the current packet.
             if simulation_duration < departure_time:
                 departure_time = departure_time + service_time
             else:
                 departure_time = simulation_duration + service_time
 
-            if departure_time < simulation_time:
-                queue.append(Event("Departure", departure_time, link_number))
+            # Append the arrival and departure events to the Queue list.
+            queue.append(Event("Arrival", simulation_duration, link_number))
+            queue.append(Event("Departure", departure_time, link_number))
 
-            if simulation_duration > simulation_time:
-                break
+            # Append an integer to link the departure and arrival events
+            # the finite buffer case.
             link_number += 1
 
-        # Generate observer events.
+        # Generate observer events at 5 times the rate of arrival/departure events.
         simulation_duration = 0
-        while (1):
-            time = exponential_random_var(packet_rate_lambd * 5)
-            simulation_duration += time
+        while simulation_duration < simulation_time:
+            event_time = exponential_random_var(packet_rate_lambd * 5)
+            simulation_duration += event_time
             queue.append(Event("Observer", simulation_duration, -1))
 
-            if simulation_duration > simulation_time:
-                break
-
+        # Sort queue based on occurrence time.
         queue.sort(key=Event.get_occurrence_time)
 
         self.queue = queue
@@ -92,12 +97,10 @@ class Event:
         return self.link_number 
 
 
-
 def startSimulation(simulation_duration, packet_rate_lambd, size_lambd, transmission_rate, buffer_size):
     queue = Queue(simulation_duration, packet_rate_lambd, size_lambd, transmission_rate)
 
     output_list = []
-    
 
     packets_in_buffer = 0
     packets_loss = 0
@@ -122,19 +125,22 @@ def startSimulation(simulation_duration, packet_rate_lambd, size_lambd, transmis
             output_list.append({'time': event.get_occurrence_time(), 'packets': packets_in_buffer})
         i += 1
 
-    packets_average = 0
-    packets_idle = 0
-    for i in output_list:
-        packets_average += i["packets"]
-        if (i["packets"] == 0): 
-            packets_idle += 1
+    # Define variables and assign starting values.
+    number_of_packets = 0
+    no_packets = 0
 
+    # Count the total number of packets in the buffer at the observer events.
+    # If packets_in_buffer = 0, then the buffer is idle. Increment its
+    # respective counter.
+    for observer_event in output_list:
+        number_of_packets += observer_event["packets"]
+        if (observer_event["packets"] == 0):
+            no_packets += 1
 
-    packets_average = packets_average / len(output_list)
-    packets_idle = packets_idle / len(output_list)
+    packets_average = number_of_packets / len(output_list)
+    packets_idle = no_packets / len(output_list)
     packets_loss = packets_loss / len(output_list)
 
-    
     return {"packets_average": packets_average, "packets_idle" : packets_idle, "packets_loss" : packets_loss}
 
 # For question 3
