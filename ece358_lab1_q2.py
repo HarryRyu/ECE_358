@@ -1,6 +1,7 @@
 import math
 import random
 import matplotlib.pyplot as plt
+import statistics
 import sys
 import time
 import threading
@@ -113,8 +114,7 @@ def startSimulation(simulation_duration, packet_rate_lambd, size_lambd, transmis
     total_packets_arrival = 0  # Used for counting total number of arrived packets.
     i = 0
     queue_size = queue.size()
-    while queue.size() != 0:
-
+    while queue_size != 0:
         percentage = math.floor((i / queue_size * 100))
         if percentage % 10 == 0:
             print(f'{percentage}% done')
@@ -152,6 +152,10 @@ def startSimulation(simulation_duration, packet_rate_lambd, size_lambd, transmis
     return {"packets_average": packets_average, "packets_idle": packets_idle, "packets_loss": packets_loss}
 
 
+def percent_difference(value1, value2):
+    return (abs(value1-value2))/(statistics.mean([value1, value2]))
+
+
 # For question 3
 def simulate_question_3():
     start_time = time.time()
@@ -160,6 +164,8 @@ def simulate_question_3():
     TRANSMISSION_TIME = 1000000
     PACKET_SIZE = 2000
     simulation_time = 0
+    max_iteration = 10  # Used to ensure that we don't get stuck in an infinite loop.
+    difference_counter = 0
 
     # List to store # of packets in buffer.
     prev_average_list_y = []
@@ -168,10 +174,16 @@ def simulate_question_3():
     prev_idle_list_y = []
 
     # List of p steps.
-    list_x = []
+    start_rho = 25
+    end_rho = 105
+    step_rho = 10
 
-    # For stability testing.
+    # Use list comprehension to create list of rho's.
+    list_x = list(value / 100 for value in range(start_rho, end_rho, step_rho))
+
+    # For stability testing. This will get updated if the percent difference is < 5%.
     test_pass = False
+    final_graph_values = []
 
     # Run until margin is less than 5%
     while not test_pass:
@@ -181,22 +193,27 @@ def simulate_question_3():
 
         print(f'It has been {minutes}m {seconds}s')
         simulation_time += 1000
-        print(f'Running simulation with time: {simulation_time}')
-        # Run with different values of p, step size of 0.1
-        for i in range(25, 35, 10):
-            print(f'Initiating rho of: {i/100}')
-            average_list_y = []
-            idle_list_y = []
-            p = i * TRANSMISSION_TIME / 2000 / 100
-            simulation_result = startSimulation(simulation_time, p, 1 / PACKET_SIZE, TRANSMISSION_TIME, 10)
+        # Run with different values of p, step size of 0.1.
+        # Create lists to store calculated values.
+        average_list_y = []
+        idle_list_y = []
+        # List of p steps.
+        for rho in list_x:
+            print(f'Initiating rho of: {rho} and simulation time: {simulation_time}')
+            p = rho * TRANSMISSION_TIME / 2000
+            simulation_result = startSimulation(simulation_time, p, 1 / PACKET_SIZE, TRANSMISSION_TIME, -1)
             average_list_y.append(simulation_result["packets_average"])
             idle_list_y.append(simulation_result["packets_idle"])
-            list_x.append(i / 100)
+
+        graph_values = {'simulation_time': simulation_time,
+                        'average_list_y': average_list_y,
+                        'idle_list_y': idle_list_y}
+        final_graph_values.append(graph_values)
 
         if len(prev_average_list_y) != 0:
             for i in range(len(prev_average_list_y)):
-                margin = abs((prev_average_list_y[i] - average_list_y[i]) / prev_average_list_y[i])
-                margin2 = abs((prev_idle_list_y[i] - idle_list_y[i]) / prev_idle_list_y[i])
+                margin = percent_difference(prev_average_list_y[i], average_list_y[i])
+                margin2 = percent_difference(prev_idle_list_y[i], idle_list_y[i])
                 if margin > 0.05 and margin2 > 0.05:
                     test_pass = False
                     break
@@ -205,19 +222,40 @@ def simulate_question_3():
 
         prev_average_list_y = average_list_y
         prev_idle_list_y = idle_list_y
+        if difference_counter > max_iteration:
+            print('Maximum iteration reached! Code did not converge.')
+            break
+    # Create legend list for graph.
+    legend = []
 
-    # Plot the graphs
-    plt.plot(list_x, prev_average_list_y)
-    plt.xlabel("p")
-    plt.ylabel("E[N]")
-    plt.title(f'Average # of Packets vs Utilization of Queue with Simulation Time: {simulation_time}')
+    # Iteratively plot the graphs.
+    for graph_value in final_graph_values:
+        plt.plot(list_x, graph_value['average_list_y'])
+        legend.append(graph_value['simulation_time'])
+    plt.legend(legend)
+    plt.xlabel("Traffic intensity, p")
+    plt.ylabel("Average number of packets, E[N]")
+    plt.title(f'Average # of Packets vs Traffic Intensity with varying simulation times')
     plt.show()
 
-    plt.plot(list_x, prev_idle_list_y)
-    plt.xlabel("p")
-    plt.ylabel("P_idle")
-    plt.title(f'P_idle vs Utilization of Queue with Simulation Time: {simulation_time}')
+    for graph_value in final_graph_values:
+        plt.plot(list_x, graph_value['idle_list_y'])
+    plt.legend(legend)
+    plt.xlabel("Traffic intensity, p")
+    plt.ylabel("Fraction of time that buffer is empty, P_idle")
+    plt.title(f'P_idle vs Traffic intensity with varying simulation times')
     plt.show()
+
+
+def simulate_question_4():
+    rho = 1.2
+    transmission_time = 1e6
+    packet_size = 2000
+    simulation_time = 1000
+    input_lambd = rho * transmission_time / packet_size
+    simulation_result = startSimulation(simulation_time, input_lambd, 1 / packet_size, transmission_time, -1)
+    print(f'E[N]: {simulation_result["packets_average"]} with rho: {rho}\n'
+          f'P_idle: {simulation_result["packets_idle"]}')
 
 
 # Constant variables
@@ -399,6 +437,7 @@ def simulate_thread(simulation_time, packet_rate, buffer_size, average_list_y, i
 # current_time = time.time() - start_time
 # minutes = math.floor(current_time / 60)
 # seconds = current_time % 60
+
 
 # print(f'It has been {minutes}m {seconds}s')
 simulate_question_3()
