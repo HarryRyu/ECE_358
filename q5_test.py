@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import statistics
 import sys
 import time
-import threading
 
 
 def exponential_random_var(lambd):
@@ -13,55 +12,7 @@ def exponential_random_var(lambd):
     return -1 * (1 / lambd) * math.log(1 - uniform_random_var)
 
 
-class Queue:
-    def __init__(self, simulation_time, packet_rate_lambd, size_lambd, transmission_rate):
-        self.packet_rate_lambd = packet_rate_lambd
-        self.size_lambd = size_lambd
-        self.simulation_time = simulation_time
-
-        simulation_duration = 0
-        link_number = 0
-        queue = []
-
-        # Generate arrival and departure events.
-        while simulation_duration < simulation_time:
-            # Generate random variables of inter-arrival times and sizes of packets.
-            event_time = exponential_random_var(packet_rate_lambd)
-
-            # Sum the total arrival time so it halts once it is equal to or greater
-            # than the provided simulation time.
-            simulation_duration += event_time
-
-            # Append the arrival events to the Queue list. Will be tuple.
-            queue.append((simulation_duration, "Arrival"))
-
-        # Generate observer events at 5 times the rate of arrival/departure events.
-        simulation_duration = 0
-        while simulation_duration < simulation_time:
-            event_time = exponential_random_var(packet_rate_lambd * 5)
-            simulation_duration += event_time
-            queue.append((simulation_duration, "Observer"))
-
-        # Make it a heapq by
-        heapq.heapify(queue)
-        self.queue = queue
-        # Generate random variable for departure event
-        # exponential_var = exponential_random_var(packet_rate_lambd)
-
-        # Insert departure event
-        # departure_time = simulation_duration + exponential_var
-        # heap_departure = (departure_time, "Departure")
-        # heapq.heappush(heap_queue, heap_departure)
-        # self.queue = heap_queue
-
-    def pop_event_from_queue(self):
-        return heapq.heappop(self.queue)
-
-    def size(self):
-        return len(self.queue)
-
-
-def create_queue(simulation_time, packet_rate_lambd, size_lambd):
+def create_queue(simulation_time, packet_rate_lambd):
     simulation_duration = 0
     queue = []
 
@@ -83,35 +34,12 @@ def create_queue(simulation_time, packet_rate_lambd, size_lambd):
         event_time = exponential_random_var(packet_rate_lambd * 5)
         simulation_duration += event_time
         queue.append((simulation_duration, "Observer"))
-    # Make it a heapq and return
 
     return queue
 
 
-class Event:
-    def __init__(self, event_type, occurrence_time, link_number):
-        self.event_type = event_type
-        self.occurrence_time = occurrence_time
-        self.link_number = link_number
-
-    def get_event_type(self):
-        return self.event_type
-
-    def get_occurrence_time(self):
-        return self.occurrence_time
-
-    def insert_service_time(self, service_time):
-        self.service_time = service_time
-
-    def get_link_number(self):
-        return self.link_number
-
-    def set_event_type(self, event):
-        self.event_type = event
-
-
-def start_simulation(simulation_duration, packet_rate_lambd, size_lambd, buffer_size):
-    queue = create_queue(simulation_duration, packet_rate_lambd, size_lambd)
+def start_simulation(simulation_duration, packet_rate_lambd, size_lambd, buffer_size, transmission_rate):
+    queue = create_queue(simulation_duration, packet_rate_lambd)
 
     # Make it a heapq
     heapq.heapify(queue)
@@ -123,6 +51,7 @@ def start_simulation(simulation_duration, packet_rate_lambd, size_lambd, buffer_
     packets_loss = 0  # Used for counting if packets are dropped due to buffer overflow.
     observer_count = 0  # Used for counting total number of observer events.
     total_packets_arrival = 0  # Used for counting total number of arrived packets.
+    departure_time = 0
     i = 0
     queue_size = len(queue)
     while len(queue) != 0:
@@ -132,6 +61,7 @@ def start_simulation(simulation_duration, packet_rate_lambd, size_lambd, buffer_
             sys.stdout.write("\033[F")
 
         event = heapq.heappop(queue)
+        simulation_duration = event[0]
         # Depending on the type of the event, modify the buffer and increment
         # respective counters.
         if event[1] == "Arrival":
@@ -140,11 +70,19 @@ def start_simulation(simulation_duration, packet_rate_lambd, size_lambd, buffer_
                 packets_loss += 1
             else:
                 packets_in_buffer += 1
+
                 # Generate random variable for departure event
-                exponential_var = exponential_random_var(packet_rate_lambd)
+                packet_size = exponential_random_var(size_lambd)
+
+                # Service time
+                service_time = packet_size / transmission_rate
 
                 # Insert departure event
-                departure_time = event[0] + exponential_var
+                if simulation_duration < departure_time:
+                    departure_time = departure_time + service_time
+                else:
+                    departure_time = simulation_duration + service_time
+
                 heap_departure = (departure_time, "Departure")
                 heapq.heappush(queue, heap_departure)
             total_packets_arrival += 1
@@ -216,7 +154,7 @@ def simulate_question_6():
         for rho in list_x:
             print(f'Initiating rho of: {rho} and simulation time: {simulation_time}')
             p = rho * transmission_time / 2000
-            simulation_result = start_simulation(simulation_time, p, 1 / packet_size, 10)
+            simulation_result = start_simulation(simulation_time, p, 1 / packet_size, 10, transmission_time)
             average_list_y.append(simulation_result["packets_average"])
             idle_list_y.append(simulation_result["packets_idle"])
 
