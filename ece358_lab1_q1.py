@@ -1,12 +1,6 @@
-import math
-import random
 from statistics import mean, variance
 
-
-# Formula to calculate an exponential random variable, with a given lambda.
-def exponential_random_var(lambd):
-    uniform_random_var = random.random()
-    return -1 * (1/lambd) * math.log(1 - uniform_random_var)
+from ece358_lab1_functions import exponential_random_var
 
 
 # Create list to append all generated variables.
@@ -27,5 +21,6 @@ variance_random_var = variance(exponential_random_var_list)
 # Calculate expected mean and variance for comparison.
 mean_expected = 1 / LAMBD
 variance_expected = 1 / LAMBD ** 2
+
 print(f'Calculated Mean: {mean_random_var}, Expected Mean: {mean_expected}')
 print(f'Calculated Variance: {variance_random_var}, Expected Variance: {variance_expected}')
