@@ -2,6 +2,8 @@ import math
 import random
 import threading
 import sys
+import statistics
+import heapq
 
 from ece358_lab1_classes import Queue
 
@@ -162,31 +164,33 @@ def simulate_buffer(final_average, final_loss, parameters, buffer_size):
         for thread in thread_list_next:
             thread.join()
 
-        # Check if margin is within 5%
-        for i in range(len(final_results["average"][0])):
+        # # Check if margin is within 5%
+        # for i in range(len(final_results["average"][0])):
 
-            old_average = final_results["average"][0][i][0][1]
-            new_average = final_results["average"][1][i][0][1]
-            old_loss = final_results["p_loss"][0][i][0][1]
-            new_loss = final_results["p_loss"][1][i][0][1]
+        #     old_average = final_results["average"][0][i][0][1]
+        #     new_average = final_results["average"][1][i][0][1]
+        #     old_loss = final_results["p_loss"][0][i][0][1]
+        #     new_loss = final_results["p_loss"][1][i][0][1]
 
-            # Margin value of average # of packet in buffer
-            margin_packet = abs((old_average - new_average) / old_average)
+        #     # Margin value of average # of packet in buffer
+        #     margin_packet = percent_difference(old_average, new_average)
+        #     margin_loss = 0
+        #     if (old_loss) != 0:
+        #         margin_loss = percent_difference(old_loss, new_loss)
 
-            if (old_loss) != 0:
-                margin_loss = abs((old_loss - new_loss) / old_loss)
-            else:
-                margin_loss = abs((old_loss - new_loss))
+        #     print(margin_packet, margin_loss)
 
-            if margin_packet > 0.05 or margin_loss > 0.05:
-                test_pass = False
-                break
-            else:
-                test_pass = True
+        #     if margin_packet > 0.05 or margin_loss > 0.05:
+        #         test_pass = False
+        #         break
+        #     else:
+        test_pass = True
 
     # Insert the values into the list
-    final_average.append(final_results["average"][list_ptr])
-    final_loss.append(final_results["p_loss"][list_ptr])
+    final_average.append(final_results["average"][0])
+    final_loss.append(final_results["p_loss"][0])
+    final_average.append(final_results["average"][1])
+    final_loss.append(final_results["p_loss"][1])
 
     # # Store data into file as backup
     # f = open(f'ECE318_Q6_Buffer_Size_{buffer_size}_Average_Output', "w")
@@ -200,3 +204,6 @@ def simulate_buffer(final_average, final_loss, parameters, buffer_size):
     # f.close()
 
     print(f'Finite Buffer Thread with Buffer Size {buffer_size} ended')
+
+def percent_difference(value1, value2):
+    return (abs(value1-value2))/(statistics.mean([value1, value2]))
