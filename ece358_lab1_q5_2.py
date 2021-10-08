@@ -34,7 +34,6 @@ def create_queue(simulation_time, packet_rate_lambd):
 
         simulation_duration += event_time
         queue.append((simulation_duration, "Observer"))
-    # Make it a heapq and return
     return queue
 
 
@@ -51,6 +50,7 @@ def start_simulation(simulation_duration, packet_rate_lambd, size_lambd, buffer_
     packets_loss = 0  # Used for counting if packets are dropped due to buffer overflow.
     observer_count = 0  # Used for counting total number of observer events.
     total_packets_arrival = 0  # Used for counting total number of arrived packets.
+    departure_time = 0
     i = 0
     queue_size = len(queue)
     while len(queue) != 0:
@@ -60,7 +60,7 @@ def start_simulation(simulation_duration, packet_rate_lambd, size_lambd, buffer_
             sys.stdout.write("\033[F")
 
         event = heapq.heappop(queue)
-
+        simulation_duration = event[0]
         # Depending on the type of the event, modify the buffer and increment
         # respective counters.
         if event[1] == "Arrival":
@@ -69,10 +69,19 @@ def start_simulation(simulation_duration, packet_rate_lambd, size_lambd, buffer_
                 packets_loss += 1
             else:
                 packets_in_buffer += 1
+
                 # Generate random variable for departure event
-                exponential_var = exponential_random_var(1/(size_lambd / transmission_rate))
+                packet_size = exponential_random_var(size_lambd)
+
+                # Service time
+                service_time = packet_size / transmission_rate
+
                 # Insert departure event
-                departure_time = event[0] + exponential_var
+                if simulation_duration < departure_time:
+                    departure_time = departure_time + service_time
+                else:
+                    departure_time = simulation_duration + service_time
+
                 heap_departure = (departure_time, "Departure")
                 heapq.heappush(queue, heap_departure)
             total_packets_arrival += 1
@@ -144,7 +153,7 @@ def simulate_question_6():
         for rho in list_x:
             print(f'Initiating rho of: {rho} and simulation time: {simulation_time}')
             p = rho * transmission_time / 2000
-            simulation_result = start_simulation(simulation_time, p, packet_size, -1, transmission_time)
+            simulation_result = start_simulation(simulation_time, p, 1 / packet_size, 10, transmission_time)
             average_list_y.append(simulation_result["packets_average"])
             idle_list_y.append(simulation_result["packets_idle"])
 
