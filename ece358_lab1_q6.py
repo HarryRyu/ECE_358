@@ -58,74 +58,19 @@ def simulate_question_6():
 
     
     # Store data into file as backup
-    f = open(f'ECE356_Q6_Average_Output_3', "w")
+    f = open(f'ECE356_Q6_Average_Output', "w")
     string1 = repr(final_average)
     f.write(string1)
     f.close()
 
-    f = open(f'ECE3568_Q6_Loss_Output_3', "w")
+    f = open(f'ECE3568_Q6_Loss_Output', "w")
     string1 = repr(final_loss)
     f.write(string1)
     f.close()
 
-    for i in range(len(final_average)):
-        for _ in range(len(final_average[i][0])):
-            average = heapq.heappop(final_average[i][0])[0][0]
-            idle = heapq.heappop(final_loss[i][0])[0][0]
-            average_2 = heapq.heappop(final_average[i][1])[0][0]
-            idle_2 = heapq.heappop(final_loss[i][1])[0][0]
+    Average_Output_Plot(final_average)
+    Loss_Output_Plot(final_loss)
 
-            final_average_list_1[i].append(average[1])
-            final_loss_list_1[i].append(idle[1])
-            final_average_list_2[i].append(average_2[1])
-            final_loss_list_2[i].append(idle_2[1])
-
-    # Store data into file as backup
-    f = open(f'ECE356_Q6_Average_Output', "w")
-    string1 = repr(final_average_list_1)
-    f.write(string1)
-    f.close()
-
-    f = open(f'ECE3568_Q6_Loss_Output', "w")
-    string1 = repr(final_loss_list_1)
-    f.write(string1)
-    f.close()
-
-    # Store data into file as backup
-    f = open(f'ECE356_Q6_Average_Output_2', "w")
-    string1 = repr(final_average_list_2)
-    f.write(string1)
-    f.close()
-
-    f = open(f'ECE3568_Q6_Loss_Output_2', "w")
-    string1 = repr(final_loss_list_2)
-    f.write(string1)
-    f.close()
-
-    # Plot the graphs
-    plt.plot(list_x, final_average_list_1[0])
-    plt.plot(list_x, final_average_list_1[1])
-    plt.plot(list_x, final_average_list_1[2])
-    plt.plot(list_x, final_average_list_2[0])
-    plt.plot(list_x, final_average_list_2[1])
-    plt.plot(list_x, final_average_list_2[2])
-    plt.xlabel("Traffic intensity, p")
-    plt.ylabel("Average number of packets, E[N]")
-    plt.title(f'Average # of Packets vs Traffic Intensity')
-    plt.legend(buffer_size)
-    plt.show()
-
-    plt.plot(list_x, final_loss_list_1[0])
-    plt.plot(list_x, final_loss_list_1[1])
-    plt.plot(list_x, final_loss_list_1[2])
-    plt.plot(list_x, final_loss_list_2[0])
-    plt.plot(list_x, final_loss_list_2[1])
-    plt.plot(list_x, final_loss_list_2[2])
-    plt.xlabel("Traffic intensity, p")
-    plt.ylabel("Amount of packets lost, P_loss")
-    plt.title("P_loss vs Traffic Intensity")
-    plt.legend(buffer_size)
-    plt.show()
     current_time = time.time() - start_time
     minutes = math.floor(current_time / 60)
     seconds = current_time % 60
@@ -133,5 +78,94 @@ def simulate_question_6():
     print(f'It has been {minutes}m {seconds}s')
     print("----- Q6 Simulation Terminated -----")
 
+def Average_Output_Plot(average_data):
+    simulation_1000_10_data = []
+    simulation_1000_25_data = []
+    simulation_1000_50_data = []
+    simulation_2000_10_data = []
+    simulation_2000_25_data = []
+    simulation_2000_50_data = []
+
+    heapq.heapify(average_data[0][0])
+    heapq.heapify(average_data[0][1])
+    heapq.heapify(average_data[1][0])
+    heapq.heapify(average_data[1][1])
+    heapq.heapify(average_data[2][0])
+    heapq.heapify(average_data[2][1])
+
+
+    size = len(average_data[0][0])
+
+    for _ in range(size):
+        simulation_1000_10_data.append(heapq.heappop(average_data[0][0])[0][1])
+        simulation_1000_25_data.append(heapq.heappop(average_data[1][0])[0][1])
+        simulation_1000_50_data.append(heapq.heappop(average_data[2][0])[0][1])
+        simulation_2000_10_data.append(heapq.heappop(average_data[0][1])[0][1])
+        simulation_2000_25_data.append(heapq.heappop(average_data[1][1])[0][1])
+        simulation_2000_50_data.append(heapq.heappop(average_data[2][1])[0][1])
+        
+
+    list_x = []
+    for packet_rate in range(50, 160, 10):
+        list_x.append(packet_rate / 100)
+
+    # Plot the graphs
+    plt.plot(list_x, simulation_1000_10_data)
+    plt.plot(list_x, simulation_1000_25_data)
+    plt.plot(list_x, simulation_1000_50_data)
+    plt.plot(list_x, simulation_2000_10_data)
+    plt.plot(list_x, simulation_2000_25_data)
+    plt.plot(list_x, simulation_2000_50_data)
+    plt.xlabel("Traffic intensity, p")
+    plt.ylabel("Average number of packets, E[N]")
+    plt.title(f'Average # of Packets vs Traffic Intensity')
+    plt.legend(["10 - 1000T","25 - 1000T","50 - 1000T", "10 - 2000T","25 - 2000T","50 - 2000T"])
+
+    plt.show()
+
+def Loss_Output_Plot(average_data):
+    simulation_1000_10_data = []
+    simulation_1000_25_data = []
+    simulation_1000_50_data = []
+    simulation_2000_10_data = []
+    simulation_2000_25_data = []
+    simulation_2000_50_data = []
+
+    heapq.heapify(average_data[0][0])
+    heapq.heapify(average_data[0][1])
+    heapq.heapify(average_data[1][0])
+    heapq.heapify(average_data[1][1])
+    heapq.heapify(average_data[2][0])
+    heapq.heapify(average_data[2][1])
+
+
+    size = len(average_data[0][0])
+
+    for _ in range(size):
+        simulation_1000_10_data.append(heapq.heappop(average_data[0][0])[0][1])
+        simulation_1000_25_data.append(heapq.heappop(average_data[1][0])[0][1])
+        simulation_1000_50_data.append(heapq.heappop(average_data[2][0])[0][1])
+        simulation_2000_10_data.append(heapq.heappop(average_data[0][1])[0][1])
+        simulation_2000_25_data.append(heapq.heappop(average_data[1][1])[0][1])
+        simulation_2000_50_data.append(heapq.heappop(average_data[2][1])[0][1])
+        
+
+    list_x = []
+    for packet_rate in range(50, 160, 10):
+        list_x.append(packet_rate / 100)
+
+    # Plot the graphs
+    plt.plot(list_x, simulation_1000_10_data)
+    plt.plot(list_x, simulation_1000_25_data)
+    plt.plot(list_x, simulation_1000_50_data)
+    plt.plot(list_x, simulation_2000_10_data)
+    plt.plot(list_x, simulation_2000_25_data)
+    plt.plot(list_x, simulation_2000_50_data)
+    plt.xlabel("Traffic intensity, p")
+    plt.ylabel("Average number of packets, E[N]")
+    plt.title(f'Average # of Packets vs Traffic Intensity')
+    plt.legend(["10 - 1000T","25 - 1000T","50 - 1000T", "10 - 2000T","25 - 2000T","50 - 2000T"])
+
+    plt.show()
 
 simulate_question_6()

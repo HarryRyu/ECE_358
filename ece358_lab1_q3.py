@@ -16,7 +16,6 @@ def simulate_question_3():
     parameters = {"packet_rates" : packet_rates, "packet_size" : 2000, "transmission_rate" : 1e6}
     buffer_size = -1
     simulation_time = 1000
-
     # List of p steps
     list_x = []
     thread_list = []
