@@ -162,8 +162,8 @@ def Loss_Output_Plot(average_data):
     plt.plot(list_x, simulation_2000_25_data)
     plt.plot(list_x, simulation_2000_50_data)
     plt.xlabel("Traffic intensity, p")
-    plt.ylabel("Average number of packets, E[N]")
-    plt.title(f'Average # of Packets vs Traffic Intensity')
+    plt.ylabel("Fraction of packets loss, p_loss")
+    plt.title(f'Packets Loss vs Traffic Intensity')
     plt.legend(["10 - 1000T","25 - 1000T","50 - 1000T", "10 - 2000T","25 - 2000T","50 - 2000T"])
 
     plt.show()
