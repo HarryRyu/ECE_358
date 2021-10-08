@@ -2,10 +2,12 @@ import math
 import random
 import heapq
 
+
 # Formula to calculate an exponential random variable, with a given lambda.
 def exponential_random_var(lambd):
     uniform_random_var = random.random()
     return -1 * (1/lambd) * math.log(1 - uniform_random_var)
+
 
 class Queue:
     def __init__(self, parameters, packet_rate, simulation_time):
@@ -16,7 +18,6 @@ class Queue:
         self.departure_time = 0
 
         actual_packet_rate = self.packet_rate * self.transmission_rate / self.packet_size
-        
 
         simulation_duration = 0
         queue = []

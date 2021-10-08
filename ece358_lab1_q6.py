@@ -4,7 +4,8 @@ import time
 import threading
 import heapq
 
-from ece358_lab1_functions import simlutate_buffer
+from ece358_lab1_functions import simulate_buffer
+
 
 # For question 6
 def simulate_question_6():
@@ -31,7 +32,7 @@ def simulate_question_6():
 
     thread_list = []
     for j in range(len(buffer_size)):
-        thread_list.append(threading.Thread(target=simlutate_buffer, args=(final_average[j], final_loss[j], parameters, buffer_size[j])))
+        thread_list.append(threading.Thread(target=simulate_buffer, args=(final_average[j], final_loss[j], parameters, buffer_size[j])))
 
     for thread in thread_list:
         thread.start()
@@ -67,24 +68,23 @@ def simulate_question_6():
     string1 = repr(final_loss_list)
     f.write(string1)
     f.close()
-        
 
     # Plot the graphs
     plt.plot(list_x, final_average_list[0])
     plt.plot(list_x, final_average_list[1])
     plt.plot(list_x, final_average_list[2])
-    plt.xlabel("p")
-    plt.ylabel("E[N]")
-    plt.title(f'Average # of Packets vs Utilization of Queue')
+    plt.xlabel("Traffic intensity, p")
+    plt.ylabel("Average number of packets, E[N]")
+    plt.title(f'Average # of Packets vs Traffic Intensity')
     plt.legend(buffer_size)
     plt.show()
 
     plt.plot(list_x, final_loss_list[0])
     plt.plot(list_x, final_loss_list[1])
     plt.plot(list_x, final_loss_list[2])
-    plt.xlabel("p")
-    plt.ylabel("P_loss")
-    plt.title(f'P_loss vs Utilization of Queue')
+    plt.xlabel("Traffic intensity, p")
+    plt.ylabel("Amount of packets lost, P_loss")
+    plt.title("P_loss vs Traffic Intensity")
     plt.legend(buffer_size)
     plt.show()
     current_time = time.time() - start_time
@@ -93,5 +93,6 @@ def simulate_question_6():
 
     print(f'It has been {minutes}m {seconds}s')
     print("----- Q6 Simulation Terminated -----")
+
 
 simulate_question_6()

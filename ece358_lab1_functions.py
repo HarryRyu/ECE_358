@@ -5,6 +5,13 @@ import sys
 
 from ece358_lab1_classes import Queue
 
+
+# Formula to calculate an exponential random variable, with a given lambda.
+def exponential_random_var(lambd):
+    uniform_random_var = random.random()
+    return -1 * (1/lambd) * math.log(1 - uniform_random_var)
+
+
 def startSimulation(parameters, packet_rate, buffer_size, simulation_time):
 
     queue = Queue(parameters, packet_rate, simulation_time)
@@ -76,9 +83,7 @@ def simulate_thread(parameters, packet_rate, buffer_size, simulation_time, avera
           f'and simulation time {simulation_time} ended')
 
 
-
-
-def simlutate_buffer(final_average, final_loss, parameters, buffer_size):
+def simulate_buffer(final_average, final_loss, parameters, buffer_size):
     simulation_time = parameters["simulation_time"] 
     packet_rates = parameters["packet_rates"]
 
@@ -87,8 +92,8 @@ def simlutate_buffer(final_average, final_loss, parameters, buffer_size):
     # List for storing output. It will be a 3D list: 2nd dimension for storing different simulation time,
     # 3rd dimension for storing different packet rates.
     final_results = {
-        "average": [[],[]],
-        "p_loss": [[],[]]
+        "average": [[], []],
+        "p_loss": [[], []]
     }
 
     # ---------- GENERATING FIRST SET OF DATA -----------
@@ -105,7 +110,7 @@ def simlutate_buffer(final_average, final_loss, parameters, buffer_size):
         
         average = final_results["average"][0][list_counter]
         p_loss = final_results["p_loss"][0][list_counter]
-        p_idle =  []
+        p_idle = []
 
         packet_rate = packet_rate / 100
         t = threading.Thread(target=simulate_thread, args=(parameters, packet_rate, buffer_size, simulation_time, average, p_idle, p_loss))
@@ -139,7 +144,7 @@ def simlutate_buffer(final_average, final_loss, parameters, buffer_size):
 
             average = final_results["average"][list_ptr][list_counter]
             p_loss = final_results["p_loss"][list_ptr][list_counter]
-            p_idle =  []
+            p_idle = []
             packet_rate = packet_rate / 100
             t = threading.Thread(target=simulate_thread, args=(parameters, packet_rate, buffer_size, simulation_time, average, p_idle, p_loss))
             thread_list_next.append(t)
@@ -195,5 +200,3 @@ def simlutate_buffer(final_average, final_loss, parameters, buffer_size):
     # f.close()
 
     print(f'Finite Buffer Thread with Buffer Size {buffer_size} ended')
-
-

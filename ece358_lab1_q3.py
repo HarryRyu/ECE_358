@@ -6,6 +6,7 @@ import heapq
 
 from ece358_lab1_functions import simulate_thread
 
+
 # For question 3
 def simulate_question_3():
     print("----- Q3 Simulation Initiated -----")
@@ -47,19 +48,17 @@ def simulate_question_3():
         final_average_list.append(average[1])
         final_idle_list.append(idle[1])
 
-
-
     # Plot the graphs
     plt.plot(list_x, final_average_list)
-    plt.xlabel("p")
-    plt.ylabel("E[N]")
-    plt.title(f'Average # of Packets vs Utilization of Queue')
+    plt.xlabel("Traffic intensity, p")
+    plt.ylabel("Average number of packets, E[N]")
+    plt.title(f'Average # of Packets vs Traffic Intensity')
     plt.show()
 
     plt.plot(list_x, final_idle_list)
     plt.xlabel("p")
     plt.ylabel("P_idle")
-    plt.title(f'P_idle vs Utilization of Queue')
+    plt.title("P_idle vs Traffic Intensity")
     plt.show()
     current_time = time.time() - start_time
     minutes = math.floor(current_time / 60)
@@ -67,5 +66,6 @@ def simulate_question_3():
 
     print(f'It has been {minutes}m {seconds}s')
     print("----- Q3 Simulation Terminated -----")
+
 
 simulate_question_3()
