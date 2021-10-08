@@ -173,11 +173,11 @@ def simlutate_buffer(final_average, final_loss, parameters, buffer_size):
             else:
                 margin_loss = abs((old_loss - new_loss))
 
-            # if margin_packet > 0.05 or margin_loss > 0.05:
-            #     test_pass = False
-            #     break
-            # else:
-            test_pass = True
+            if margin_packet > 0.05 or margin_loss > 0.05:
+                test_pass = False
+                break
+            else:
+                test_pass = True
 
     # Insert the values into the list
     final_average.append(final_results["average"][list_ptr])
