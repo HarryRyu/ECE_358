@@ -3,6 +3,7 @@ import random
 import heapq
 
 KMAX = 10
+LAN_SPEED = 1e6
 TP = 512
 
 
@@ -46,18 +47,21 @@ class Queue:
             return -1
 
     def pop_queue(self):
-        self.queue.pop()
+        self.collision_counter = 0
+        return self.queue.pop()
 
     def exponential_wait(self, current_time):
         if len(self.queue) > 0:
             self.collision_counter += 1
 
             if self.collision_counter >= KMAX:
-                self.collision_counter = 0
                 self.pop_queue()
             else:
-                exp_random = random.randrange(0, 2 ** self.collision_counter - 1)
-                self.queue[-1] = current_time + exp_random * TP
+                exp_random = random.randrange(0, 2 ** self.collision_counter)
+                self.queue[-1] = current_time + exp_random * TP / LAN_SPEED
+
+    def test_size(self):
+        return len(self.queue)
 
 
 
