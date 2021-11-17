@@ -2,6 +2,7 @@ from ece358_lab2_classes import Queue
 import matplotlib.pyplot as plt
 
 
+# Initial copy of code. Not used.
 def start_persistent_simulation(node_total, packet_rate, lan_speed, packet_size, node_distance, propagation_speed):
     # Initial simulation time
     simulation_time = 1000
@@ -113,40 +114,40 @@ throughput = [[], [], []]
 efficiency_output, throughput_output = start_persistent_simulation(80, 10, LAN_SPEED, PACKET_SIZE, NODE_DISTANCE, PROPAGATION_SPEED)
 print(efficiency_output, throughput_output)
 
-# for i in NODE_NUM:
-#     for j in range(len(PACKET_RATE)):
-#         print(f'Starting Simulation with NODE_NUM: {i} and PACKET_RATE: {PACKET_RATE[j]}')
-#         efficiency_output, throughput_output = start_persistent_simulation(i, PACKET_RATE[j], LAN_SPEED, PACKET_SIZE, NODE_DISTANCE, PROPAGATION_SPEED)
-#         efficiency[j].append(efficiency_output)
-#         throughput[j].append(throughput_output)
+for i in NODE_NUM:
+    for j in range(len(PACKET_RATE)):
+        print(f'Starting Simulation with NODE_NUM: {i} and PACKET_RATE: {PACKET_RATE[j]}')
+        efficiency_output, throughput_output = start_persistent_simulation(i, PACKET_RATE[j], LAN_SPEED, PACKET_SIZE, NODE_DISTANCE, PROPAGATION_SPEED)
+        efficiency[j].append(efficiency_output)
+        throughput[j].append(throughput_output)
 
-# # Store data into file as backup
-# f = open("efficiency3_2000", "w")
-# string1 = repr(efficiency)
-# f.write(string1)
-# f.close()
+# Store data into file as backup
+f = open("efficiency3_2000", "w")
+string1 = repr(efficiency)
+f.write(string1)
+f.close()
 
-# f = open("throughput3_2000", "w")
-# string1 = repr(throughput)
-# f.write(string1)
-# f.close()
+f = open("throughput3_2000", "w")
+string1 = repr(throughput)
+f.write(string1)
+f.close()
 
-# plt.plot(NODE_NUM, throughput[0]) # 7 packets/sec
-# plt.plot(NODE_NUM, throughput[1]) # 10 packets/sec
-# plt.plot(NODE_NUM, throughput[2]) # 20 packets/sec
+plt.plot(NODE_NUM, throughput[0]) # 7 packets/sec
+plt.plot(NODE_NUM, throughput[1]) # 10 packets/sec
+plt.plot(NODE_NUM, throughput[2]) # 20 packets/sec
 
-# plt.legend(["7", "10", "20"], title='Arrival rate')
-# plt.ylabel("Throughput (Mbps)")
-# plt.xlabel("Number of nodes")
-# plt.title('Number of nodes vs. throughput ')
-# plt.show()
+plt.legend(["7", "10", "20"], title='Arrival rate')
+plt.ylabel("Throughput (Mbps)")
+plt.xlabel("Number of nodes")
+plt.title('Number of nodes vs. throughput ')
+plt.show()
 
-# plt.plot(NODE_NUM, efficiency[0]) # 7 packets/sec
-# plt.plot(NODE_NUM, efficiency[1]) # 10 packets/sec
-# plt.plot(NODE_NUM, efficiency[2]) # 20 packets/sec
+plt.plot(NODE_NUM, efficiency[0]) # 7 packets/sec
+plt.plot(NODE_NUM, efficiency[1]) # 10 packets/sec
+plt.plot(NODE_NUM, efficiency[2]) # 20 packets/sec
 
-# plt.legend(["7", "10", "20"], title='Arrival rate')
-# plt.ylabel("Efficiency")
-# plt.xlabel("Number of nodes")
-# plt.title('Number of nodes vs. efficiency ')
-# plt.show()
+plt.legend(["7", "10", "20"], title='Arrival rate')
+plt.ylabel("Efficiency")
+plt.xlabel("Number of nodes")
+plt.title('Number of nodes vs. efficiency ')
+plt.show()

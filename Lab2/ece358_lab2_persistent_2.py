@@ -1,7 +1,7 @@
 from ece358_lab2_classes import Queue
 import matplotlib.pyplot as plt
 
-
+# Final copy of persistent simulation (Question 1).
 def start_persistent_simulation(node_total, packet_rate, lan_speed, packet_size, node_distance, propagation_speed):
     # Initial simulation time
     simulation_time = 1000
@@ -18,29 +18,27 @@ def start_persistent_simulation(node_total, packet_rate, lan_speed, packet_size,
     current_time = 0
     while current_time <= simulation_time:
         min_packet_arrival_time, node_num = get_arrival_time(node_list, current_time)
-        # print(f'Current Time: {current_time}, Min Arrival Time: { min_packet_arrival_time}')
-        # for i in range(len(node_list)):
-        #     x = node_list[i].check_queue()
-        #     y = min_packet_arrival_time + abs(node_num[0] - i) * node_distance / propagation_speed
-        #     print(f'{i}. {x}, {y}')
         
         current_time = min_packet_arrival_time
         attempted_transmission += 1
 
         collision_detected = False
 
+        # Decide whether or not there is a collision.
         if len(node_num) == 1:
             if node_list[node_num[0]].check_queue() < current_time:
                 collision_detected, node_num = False, node_num[0]
             else:
-                # print("HELLO")
                 collision_detected, node_num = check_collision(node_list, current_time, node_num[0],
                                                                node_distance / propagation_speed)
         else:
             collision_detected, node_num = True, node_num
 
+        # If there is collision, back off appropriately.
         if collision_detected:
             exponential_backoff(node_list, node_num, current_time)
+
+        # If not, attempt to transmit (but check the medium at an exponential wait time).
         else:
             time = node_list[node_num].pop_queue()
 
@@ -51,21 +49,23 @@ def start_persistent_simulation(node_total, packet_rate, lan_speed, packet_size,
 
             successful_transmission += 1
 
-    efficiency = successful_transmission / attempted_transmission
-    throughput = successful_transmission * packet_size / simulation_time
-    ##print(efficiency, throughput, successful_transmission)
+    # Calculate metrics.
+    efficiency_value = successful_transmission / attempted_transmission
+    throughput_value = successful_transmission * packet_size / simulation_time
 
-    return efficiency, throughput
+    return efficiency_value, throughput_value
 
 
+# Exponential back off for collisions.
 def exponential_backoff(node_list, node, current_time):
     for i in range(len(node)):
         node_list[node[i]].exponential_wait(current_time)
 
 
+# Iteratively check all nodes to see if there is a collision.
 def check_collision(node_list, time, node, propagation_time):
     for i in range(len(node_list)):
-        if (i != node):
+        if i != node:
             propagation_time_final = abs(node - i) * propagation_time
             output_time = node_list[i].check_queue()
             if time + propagation_time_final > output_time > 0:
@@ -73,6 +73,7 @@ def check_collision(node_list, time, node, propagation_time):
     return False, node
 
 
+# Get the earliest time in all nodes that will act as the "sender".
 def get_arrival_time(node_list, current_time):
     min_time = 99999999
     end_after = False
@@ -97,7 +98,7 @@ def get_arrival_time(node_list, current_time):
 
     return min_time, node_num
 
-
+# Define some constants in a list to iterate simulation through.
 NODE_NUM = [20, 40, 60, 80, 100]
 PACKET_RATE = [7, 10, 20]
 LAN_SPEED = 1e6
@@ -108,6 +109,8 @@ PROPAGATION_SPEED = (2 / 3) * 3e8
 efficiency = [[], [], []]
 throughput = [[], [], []]
 
+
+# Run simulation through all packets rates, for each number of nodes.
 for i in NODE_NUM:
     for j in range(len(PACKET_RATE)):
         print(f'Starting Simulation with NODE_NUM: {i} and PACKET_RATE: {PACKET_RATE[j]}')
@@ -115,25 +118,26 @@ for i in NODE_NUM:
         efficiency[j].append(efficiency_output)
         throughput[j].append(throughput_output)
 
-# Store data into file as backup
-f = open("efficiency3_2000", "w")
+# Store data into file as backup.
+f = open("q1_eff_1000", "w")
 string1 = repr(efficiency)
 f.write(string1)
 f.close()
 
-f = open("throughput3_2000", "w")
+f = open("q1_throughput_1000", "w")
 string1 = repr(throughput)
 f.write(string1)
 f.close()
 
-plt.plot(NODE_NUM, throughput[0]) # 7 packets/sec
-plt.plot(NODE_NUM, throughput[1]) # 10 packets/sec
-plt.plot(NODE_NUM, throughput[2]) # 20 packets/sec
+# Plot the data.
+plt.plot(NODE_NUM, throughput[0])  # 7 packets/sec
+plt.plot(NODE_NUM, throughput[1])  # 10 packets/sec
+plt.plot(NODE_NUM, throughput[2])  # 20 packets/sec
 
 plt.legend(["7", "10", "20"], title='Arrival rate')
-plt.ylabel("Throughput (Mbps)")
+plt.ylabel("Throughput (bps)")
 plt.xlabel("Number of nodes")
-plt.title('Number of nodes vs. throughput ')
+plt.title('Number of nodes vs. throughput (1000T) ')
 plt.show()
 
 plt.plot(NODE_NUM, efficiency[0]) # 7 packets/sec
@@ -143,5 +147,5 @@ plt.plot(NODE_NUM, efficiency[2]) # 20 packets/sec
 plt.legend(["7", "10", "20"], title='Arrival rate')
 plt.ylabel("Efficiency")
 plt.xlabel("Number of nodes")
-plt.title('Number of nodes vs. efficiency ')
+plt.title('Number of nodes vs. efficiency (1000T) ')
 plt.show()
