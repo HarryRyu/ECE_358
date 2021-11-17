@@ -20,6 +20,7 @@ class Queue:
         self.simulation_time = simulation_time
         self.collision_counter = 0
         self.wait_time = 0
+        self.bus_counter = 0
 
         simulation_duration = 0
         queue = []
@@ -62,6 +63,38 @@ class Queue:
 
     def test_size(self):
         return len(self.queue)
+
+    def exponential_bus_wait(self, current_time, packet_size, tranmission_speed, propagation_duration):
+        if len(self.queue) > 0:
+            next_arrival_time = self.queue[-1]
+
+            if next_arrival_time < current_time + propagation_duration + packet_size / tranmission_speed:
+                self.bus_counter += 1
+
+                if self.bus_counter >= KMAX:
+                    self.queue.pop()
+                    self.bus_counter = 0
+                else:
+                    exp_random = random.randrange(0, 2 ** self.bus_counter)
+                    self.queue[-1] = next_arrival_time + exp_random * TP / LAN_SPEED
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class Queue_2:
     def __init__(self, packet_size, packet_rate, simulation_time):
