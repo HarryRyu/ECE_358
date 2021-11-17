@@ -23,7 +23,7 @@ class Queue:
 
         simulation_duration = 0
         queue = []
-        # Generate arrival and departure events.
+        # Generate arrival events.
         while simulation_duration < self.simulation_time:
             # Generate random variables of inter-arrival times and sizes of packets.
             event_time = exponential_random_var(self.packet_rate)
