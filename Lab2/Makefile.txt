@@ -1,0 +1,8 @@
+run_q1:
+	python3 ece358_lab2_persistent_2.py
+run_q2:
+	python3 ece358_lab2_non_persistent_2.py
+setup: requirements.txt
+	pip install -r requirements.txt
+clean:
+	rm -rf __pycache__
